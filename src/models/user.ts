@@ -1,22 +1,21 @@
 import { Document, Schema, model } from 'mongoose';
 import validator from 'validator';
+import { Preference } from './types.js';
+
+
+// La información a almacenar para un usuario será: nombre, correo electrónico, nombre de usuario (único), 
+// preferencia de compras (enumerado con diferentes opciones: deporte, videojuegos, etc.). 
 
 export interface UserDocumentInterface extends Document {
   name: string;
-  username: string;
   email: string;
-  age?: number;
+  username: string;
+  preference: Preference;
 }
 
 const UserSchema = new Schema<UserDocumentInterface>({
   name: {
     type: String,
-    required: true,
-    trim: true
-  },
-  username: {
-    type: String,
-    unique: true,
     required: true,
     trim: true
   },
@@ -27,19 +26,20 @@ const UserSchema = new Schema<UserDocumentInterface>({
     lowercase: true,
     validate(value: string) {
       if (!validator.default.isEmail(value)) {
-        throw new Error('Email is invalid');
+        throw new Error('La dirección de correo electrónico no es válida');
       }
     }
   },
-  age: {
-    type: Number,
-    default: 0,
-    validate(value: number) {
-      if (value < 0) {
-        throw new Error('Age must be greater than 0');
-      }
-    }
+  username: {
+    type: String,
+    unique: true,
+    required: true,
+    trim: true
   },
+  preference: {
+    type: String,
+    enum: Object.values(Preference),
+  }
 });
 
 export const User = model<UserDocumentInterface>('User', UserSchema);
